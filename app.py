@@ -9,7 +9,15 @@ import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
-
+def load_data():
+    import os
+    global students_data, internships_data
+    
+    if os.path.exists('uploads/students_data.csv'):
+        students_data = pd.read_csv('uploads/students_data.csv')
+    
+    if os.path.exists('uploads/internships_data.csv'):
+        internships_data = pd.read_csv('uploads/internships_data.csv')
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -167,7 +175,7 @@ def upload():
 
 @app.route('/data_preview')
 def data_preview():
-    global students_data, internships_data
+    load_data()   
     
     if students_data is None or internships_data is None:
         flash('Please upload data files first', 'warning')
@@ -191,6 +199,7 @@ def data_preview():
 
 @app.route('/configure', methods=['GET', 'POST'])
 def configure():
+    load_data()   # 👈 ADD THIS LINE
     if request.method == 'POST':
         # Get weights from form
         weights = {
@@ -225,6 +234,7 @@ def configure():
 
 @app.route('/process')
 def process():
+    load_data()   # 👈 ADD THIS LINE
     global students_data, internships_data, match_matrix
     
     if students_data is None or internships_data is None:
@@ -311,6 +321,7 @@ def process():
 
 @app.route('/allocate')
 def allocate():
+    load_data()   # 👈 ADD THIS LINE
     global students_data, internships_data, match_matrix, allocations
     
     if match_matrix is None:
@@ -361,6 +372,7 @@ def allocate():
 
 @app.route('/results')
 def results():
+    load_data()   # 👈 ADD THIS LINE
     global allocations, students_data, internships_data
     
     if allocations is None:
@@ -404,6 +416,7 @@ def results():
 
 @app.route('/visualizations')
 def visualizations():
+    load_data()   # 👈 ADD THIS LINE
     global allocations
     
     if allocations is None or len(allocations) == 0:
