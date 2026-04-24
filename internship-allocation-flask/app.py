@@ -19,10 +19,7 @@ app.config['ALLOWED_EXTENSIONS'] = {'csv'}
 # Create necessary folders
 os.makedirs('uploads', exist_ok=True)
 os.makedirs('results', exist_ok=True)
-# Create necessary folders
-os.makedirs('uploads', exist_ok=True)
-os.makedirs('results', exist_ok=True)
-os.makedirs('templates', exist_ok=True)
+
 # Global variables to store data
 students_data = None
 internships_data = None
@@ -646,8 +643,10 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('500.html'), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+import os
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 @app.route('/debug/check-files')
 def check_files():
