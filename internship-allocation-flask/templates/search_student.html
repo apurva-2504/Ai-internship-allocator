@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Search Student - Internship Allocator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card-container" style="max-width:800px;">
+
+        <div class="breadcrumb-custom">
+            <a href="{{ url_for('index') }}">Home</a>
+            <span>›</span>
+            <span>Search Student</span>
+        </div>
+
+        <h1 class="page-title"><i class="fas fa-search"></i> Search Student</h1>
+        <p class="page-subtitle">Find a student's allocation by ID or name</p>
+
+        <!-- Search Form -->
+        <form method="POST" action="{{ url_for('search_student') }}">
+            <div class="input-group mb-4" style="border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(79,70,229,0.1);">
+                <span class="input-group-text" style="background:#f8fafc; border:1px solid #e2e8f0; border-right:none; padding:0 1rem;">
+                    <i class="fas fa-search" style="color:#94a3b8;"></i>
+                </span>
+                <input
+                    type="text"
+                    name="search_query"
+                    class="form-control"
+                    placeholder="Enter Student ID (e.g. STU001) or Name..."
+                    style="border:1px solid #e2e8f0; border-left:none; border-right:none; font-size:0.95rem; padding:0.85rem 1rem;"
+                    required
+                    autofocus
+                >
+                <button type="submit" class="btn-primary-custom" style="border-radius:0; padding:0 1.5rem;">
+                    Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Result: Found -->
+        {% if found == True %}
+        <hr class="section-divider">
+
+        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1px solid #bbf7d0; border-radius:14px; padding:1rem 1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-check-circle" style="color:#16a34a; font-size:1.1rem;"></i>
+            <span style="color:#166534; font-size:0.875rem; font-weight:600;">Student found and successfully allocated!</span>
+        </div>
+
+        <!-- Student Profile -->
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <h5 style="color:#334155; font-weight:700; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem;">
+                    <i class="fas fa-user-graduate me-2" style="color:#4f46e5;"></i>Student Profile
+                </h5>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div style="background:#f8fafc; border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Student ID</div>
+                    <div style="font-weight:700; color:#1e293b; margin-top:2px;">{{ student_info.student_id }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div style="background:#f8fafc; border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Name</div>
+                    <div style="font-weight:700; color:#1e293b; margin-top:2px;">{{ student_info.student_name }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div style="background:#f8fafc; border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Company</div>
+                    <div style="font-weight:700; color:#1e293b; margin-top:2px;">{{ student_info.company_name }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div style="background:#f8fafc; border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Role</div>
+                    <div style="font-weight:700; color:#1e293b; margin-top:2px;">{{ student_info.role }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Scores -->
+        <h5 style="color:#334155; font-weight:700; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin:1.25rem 0 1rem;">
+            <i class="fas fa-chart-bar me-2" style="color:#4f46e5;"></i>Match Score Breakdown
+        </h5>
+
+        <!-- Total Score Hero -->
+        {% set total = student_info.total_match_score %}
+        {% if total >= 0.9 %}
+            {% set score_class = "score-excellent" %}{% set score_label = "Excellent" %}
+        {% elif total >= 0.7 %}
+            {% set score_class = "score-good" %}{% set score_label = "Good" %}
+        {% elif total >= 0.6 %}
+            {% set score_class = "score-fair" %}{% set score_label = "Fair" %}
+        {% else %}
+            {% set score_class = "score-poor" %}{% set score_label = "Acceptable" %}
+        {% endif %}
+
+        <div style="background:linear-gradient(135deg,#f0f4ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:14px; padding:1.25rem; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <div style="font-size:0.75rem; color:#6366f1; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Overall Match Score</div>
+                <div style="font-size:2.5rem; font-weight:900; color:#4f46e5; line-height:1.1;">{{ "%.1f"|format(total*100) }}%</div>
+            </div>
+            <span class="score-badge {{ score_class }}" style="font-size:0.875rem; padding:0.5rem 1.25rem;">{{ score_label }}</span>
+        </div>
+
+        <!-- Individual Scores -->
+        <div class="row g-2">
+            {% set criteria = [
+                ('Skill Match', student_info.skill_match, 'fa-code'),
+                ('Interest Match', student_info.interest_match, 'fa-heart'),
+                ('CGPA Match', student_info.cgpa_match, 'fa-graduation-cap'),
+                ('Location Match', student_info.location_match, 'fa-map-marker-alt'),
+                ('Branch Match', student_info.branch_match, 'fa-sitemap'),
+                ('Experience Match', student_info.experience_match, 'fa-briefcase')
+            ] %}
+            {% for label, score, icon in criteria %}
+            <div class="col-sm-6 col-md-4">
+                <div style="background:#f8fafc; border-radius:10px; padding:0.85rem 1rem; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:0.78rem; font-weight:600; color:#475569;">
+                            <i class="fas {{ icon }} me-1" style="color:#818cf8;"></i>{{ label }}
+                        </span>
+                        <span style="font-size:0.78rem; font-weight:700; color:#4f46e5;">{{ "%.0f"|format(score*100) }}%</span>
+                    </div>
+                    <div style="height:6px; background:#e2e8f0; border-radius:10px; overflow:hidden;">
+                        <div style="height:100%; width:{{ "%.0f"|format(score*100) }}%; background:linear-gradient(90deg,#818cf8,#4f46e5); border-radius:10px; transition:width 0.6s ease;"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Search Again -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('search_student') }}" class="btn-outline-custom">
+                <i class="fas fa-search me-2"></i>Search Another Student
+            </a>
+        </div>
+
+        {% elif found == False %}
+        <!-- Not Found -->
+        <div style="text-align:center; padding:3rem 1rem;">
+            <div style="width:80px; height:80px; background:#fee2e2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+                <i class="fas fa-user-times" style="font-size:2rem; color:#ef4444;"></i>
+            </div>
+            <h4 style="color:#1e293b; font-weight:700;">Student Not Found</h4>
+            <p style="color:#64748b; font-size:0.9rem;">No allocation found for the given ID or name. The student may not have been allocated.</p>
+            <a href="{{ url_for('download', file_type='unallocated') }}" class="btn-outline-custom me-2">
+                <i class="fas fa-download me-2"></i>View Unallocated List
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Tips (shown when no search yet) -->
+        {% if found is none %}
+        <div style="margin-top:2rem; background:#f8fafc; border-radius:14px; padding:1.5rem;">
+            <h6 style="color:#334155; font-weight:700; margin-bottom:1rem;">
+                <i class="fas fa-lightbulb me-2" style="color:#f59e0b;"></i>Search Tips
+            </h6>
+            <ul style="color:#64748b; font-size:0.875rem; padding-left:1.25rem; margin:0; line-height:2;">
+                <li>Search by full or partial <strong>Student ID</strong> (e.g., <code>STU001</code>)</li>
+                <li>Search by <strong>first or last name</strong></li>
+                <li>Search is <strong>case-insensitive</strong></li>
+                <li>If not found, check the <a href="{{ url_for('download', file_type='unallocated') }}" style="color:#4f46e5;">Unallocated Students report</a></li>
+            </ul>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

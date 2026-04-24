@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Results - Internship Allocator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card-container wide">
+
+        <div class="breadcrumb-custom">
+            <a href="{{ url_for('index') }}">Home</a>
+            <span>›</span>
+            <span>Results</span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div>
+                <h1 class="page-title"><i class="fas fa-chart-line"></i> Allocation Results</h1>
+                <p class="page-subtitle">Summary of the AI-based internship allocation process</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('visualizations') }}" class="btn-primary-custom text-decoration-none">
+                    <i class="fas fa-chart-pie me-2"></i>View Charts
+                </a>
+                <a href="{{ url_for('view_allocations') }}" class="btn-outline-custom">
+                    <i class="fas fa-list me-2"></i>All Allocations
+                </a>
+            </div>
+        </div>
+
+        <!-- Key Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem;">{{ stats.total_students }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem;">{{ stats.total_positions }}</div>
+                    <div class="stat-label">Total Positions</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem; color:#16a34a;">{{ stats.allocated }}</div>
+                    <div class="stat-label">Allocated</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem; color:#ef4444;">{{ stats.unallocated }}</div>
+                    <div class="stat-label">Unallocated</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem;">{{ stats.allocation_rate }}%</div>
+                    <div class="stat-label">Allocation Rate</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="stat-card">
+                    <div class="stat-number" style="font-size:1.6rem;">{{ "%.2f"|format(stats.avg_match_score) }}</div>
+                    <div class="stat-label">Avg Match Score</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allocation Rate Bar -->
+        <div style="background:#f8fafc; border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; border:1px solid #e2e8f0;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-weight:600; font-size:0.875rem; color:#334155;">Overall Allocation Rate</span>
+                <span style="font-weight:700; color:#4f46e5;">{{ stats.allocation_rate }}%</span>
+            </div>
+            <div style="height:12px; background:#e2e8f0; border-radius:10px; overflow:hidden;">
+                <div style="height:100%; width:{{ stats.allocation_rate }}%; background:linear-gradient(90deg,#818cf8,#4f46e5); border-radius:10px; transition:width 1s ease;"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+                <span style="font-size:0.72rem; color:#94a3b8;">{{ stats.allocated }} allocated</span>
+                <span style="font-size:0.72rem; color:#94a3b8;">{{ stats.unallocated }} unallocated</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Score Quality -->
+            <div class="col-md-5">
+                <h5 style="font-weight:700; color:#334155; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem;">
+                    <i class="fas fa-star me-2" style="color:#4f46e5;"></i>Match Score Quality
+                </h5>
+                <div style="background:#f8fafc; border-radius:14px; overflow:hidden; border:1px solid #e2e8f0;">
+                    {% set quality_colors = {
+                        'Excellent': '#16a34a',
+                        'Very Good': '#2563eb',
+                        'Good':      '#7c3aed',
+                        'Fair':      '#d97706',
+                        'Acceptable':'#dc2626'
+                    } %}
+                    {% set quality_bg = {
+                        'Excellent': '#f0fdf4',
+                        'Very Good': '#eff6ff',
+                        'Good':      '#faf5ff',
+                        'Fair':      '#fffbeb',
+                        'Acceptable':'#fef2f2'
+                    } %}
+                    {% for label, count in score_distribution.items() %}
+                    <div style="display:flex; align-items:center; padding:0.85rem 1.25rem; border-bottom:1px solid #f1f5f9; gap:12px;">
+                        <span style="width:10px; height:10px; border-radius:50%; background:{{ quality_colors.get(label,'#94a3b8') }}; flex-shrink:0;"></span>
+                        <span style="font-size:0.875rem; font-weight:600; color:#334155; flex:1;">{{ label }}</span>
+                        <span style="font-size:0.875rem; font-weight:700; color:{{ quality_colors.get(label,'#94a3b8') }};">{{ count }}</span>
+                        <span style="font-size:0.78rem; color:#94a3b8; width:40px; text-align:right;">
+                            {% if stats.allocated > 0 %}{{ "%.0f"|format(count / stats.allocated * 100) }}%{% else %}0%{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Score range -->
+                <div style="margin-top:1rem; background:#f0f4ff; border-radius:12px; padding:1rem 1.25rem; border:1px solid #c7d2fe;">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="font-size:1.2rem; font-weight:800; color:#4f46e5;">{{ stats.max_match_score }}</div>
+                            <div style="font-size:0.7rem; color:#6366f1; font-weight:600;">HIGHEST</div>
+                        </div>
+                        <div class="col-4">
+                            <div style="font-size:1.2rem; font-weight:800; color:#4f46e5;">{{ stats.avg_match_score }}</div>
+                            <div style="font-size:0.7rem; color:#6366f1; font-weight:600;">AVERAGE</div>
+                        </div>
+                        <div class="col-4">
+                            <div style="font-size:1.2rem; font-weight:800; color:#4f46e5;">{{ stats.min_match_score }}</div>
+                            <div style="font-size:0.7rem; color:#6366f1; font-weight:600;">LOWEST</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Companies -->
+            <div class="col-md-7">
+                <h5 style="font-weight:700; color:#334155; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem;">
+                    <i class="fas fa-building me-2" style="color:#4f46e5;"></i>Top Companies by Allocations
+                </h5>
+                <div style="background:#f8fafc; border-radius:14px; padding:1rem 1.25rem; border:1px solid #e2e8f0;">
+                    {% set max_val = top_companies.values()|list|max %}
+                    {% for company, count in top_companies.items() %}
+                    <div style="margin-bottom:0.85rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:0.82rem; font-weight:600; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">{{ company }}</span>
+                            <span style="font-size:0.82rem; font-weight:700; color:#4f46e5;">{{ count }} students</span>
+                        </div>
+                        <div style="height:7px; background:#e2e8f0; border-radius:10px; overflow:hidden;">
+                            <div style="height:100%; width:{{ (count/max_val*100)|round }}%; background:linear-gradient(90deg,#a5b4fc,#4f46e5); border-radius:10px;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Downloads -->
+        <h5 style="font-weight:700; color:#334155; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1.25rem;">
+            <i class="fas fa-download me-2" style="color:#4f46e5;"></i>Download Reports
+        </h5>
+        <div class="row g-3">
+            <div class="col-sm-4">
+                <a href="{{ url_for('download', file_type='allocations') }}" style="text-decoration:none;">
+                    <div style="border:1.5px solid #4f46e5; border-radius:14px; padding:1.25rem; text-align:center; transition:all 0.2s; cursor:pointer;" onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-file-csv" style="font-size:1.75rem; color:#4f46e5; margin-bottom:8px;"></i>
+                        <div style="font-weight:700; color:#1e293b; font-size:0.875rem;">Final Allocations</div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">{{ stats.allocated }} records</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-sm-4">
+                <a href="{{ url_for('download', file_type='unallocated') }}" style="text-decoration:none;">
+                    <div style="border:1.5px solid #ef4444; border-radius:14px; padding:1.25rem; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-user-times" style="font-size:1.75rem; color:#ef4444; margin-bottom:8px;"></i>
+                        <div style="font-weight:700; color:#1e293b; font-size:0.875rem;">Unallocated Students</div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">{{ stats.unallocated }} records</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-sm-4">
+                <a href="{{ url_for('download', file_type='match_matrix') }}" style="text-decoration:none;">
+                    <div style="border:1.5px solid #7c3aed; border-radius:14px; padding:1.25rem; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='#faf5ff'" onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-table" style="font-size:1.75rem; color:#7c3aed; margin-bottom:8px;"></i>
+                        <div style="font-weight:700; color:#1e293b; font-size:0.875rem;">Complete Match Matrix</div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">All pair scores</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

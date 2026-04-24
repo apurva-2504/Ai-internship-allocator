@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Data Preview - Internship Allocator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card-container wide">
+
+        <div class="breadcrumb-custom">
+            <a href="{{ url_for('index') }}">Home</a>
+            <span>›</span>
+            <a href="{{ url_for('upload') }}">Upload Data</a>
+            <span>›</span>
+            <span>Data Preview</span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div>
+                <h1 class="page-title"><i class="fas fa-table"></i> Data Preview</h1>
+                <p class="page-subtitle">Review your uploaded data before running the allocation algorithm</p>
+            </div>
+            <a href="{{ url_for('configure') }}" class="btn-primary-custom text-decoration-none">
+                Continue to Configure <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.students_count }}</div>
+                    <div class="stat-label">Students</div>
+                </div>
+            </div>
+            <div class="col-6 col-md">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.internships_count }}</div>
+                    <div class="stat-label">Internships</div>
+                </div>
+            </div>
+            <div class="col-6 col-md">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_positions }}</div>
+                    <div class="stat-label">Total Positions</div>
+                </div>
+            </div>
+            <div class="col-6 col-md">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.avg_cgpa }}</div>
+                    <div class="stat-label">Avg CGPA</div>
+                </div>
+            </div>
+            <div class="col-6 col-md">
+                <div class="stat-card">
+                    <div class="stat-number">₹{{ stats.avg_stipend | int }}</div>
+                    <div class="stat-label">Avg Stipend</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Table -->
+        <h5 style="font-weight:700; color:#334155; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.85rem;">
+            <i class="fas fa-user-graduate me-2" style="color:#4f46e5;"></i>Students Data (First 10 rows)
+        </h5>
+        <div style="overflow-x:auto; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:2rem;">
+            {{ students_preview | safe }}
+        </div>
+
+        <!-- Internships Table -->
+        <h5 style="font-weight:700; color:#334155; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.85rem;">
+            <i class="fas fa-building me-2" style="color:#4f46e5;"></i>Internships Data (First 10 rows)
+        </h5>
+        <div style="overflow-x:auto; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:2rem;">
+            {{ internships_preview | safe }}
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-between flex-wrap gap-2">
+            <a href="{{ url_for('upload') }}" class="btn-outline-custom">
+                <i class="fas fa-arrow-left me-2"></i>Re-Upload Files
+            </a>
+            <a href="{{ url_for('configure') }}" class="btn-primary-custom text-decoration-none">
+                <i class="fas fa-cog me-2"></i>Proceed to Configure
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.dataframe { width:100% !important; border-collapse:collapse; }
+.dataframe thead th {
+    background:#f8fafc !important; color:#475569 !important;
+    font-weight:600; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px;
+    border-bottom:2px solid #e2e8f0; padding:0.75rem 0.85rem; white-space:nowrap;
+}
+.dataframe tbody td {
+    padding:0.6rem 0.85rem; border-bottom:1px solid #f1f5f9;
+    font-size:0.82rem; white-space:nowrap;
+}
+.dataframe tbody tr:hover { background:#f8fafc; }
+.dataframe tbody tr:last-child td { border-bottom:none; }
+</style>
+{% endblock %}

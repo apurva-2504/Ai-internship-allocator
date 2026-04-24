@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card-container" style="max-width:600px; text-align:center; padding:4rem 2rem;">
+        <div style="font-size:5rem; font-weight:900; background:linear-gradient(135deg,#818cf8,#4f46e5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; margin-bottom:1rem;">404</div>
+        <h2 style="font-weight:700; color:#1e293b; margin-bottom:0.5rem;">Page Not Found</h2>
+        <p style="color:#64748b; margin-bottom:2rem;">The page you're looking for doesn't exist or has been moved.</p>
+        <a href="{{ url_for('index') }}" class="btn-primary-custom text-decoration-none">
+            <i class="fas fa-home me-2"></i>Go to Home
+        </a>
+    </div>
+</div>
+{% endblock %}
